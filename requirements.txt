@@ -1,0 +1,5 @@
+steam
+flask
+requests
+Flask-SocketIO
+flask_swagger_ui

@@ -1,0 +1,73 @@
+{
+  "se": [
+    {
+      "name": "Epsilon Draconis",
+      "ip": "63.141.225.67",
+      "port": 27017
+    },
+    {
+      "name": "Delta Draconis",
+      "ip": "63.141.225.67",
+      "port": 27016
+    },
+    {
+      "name": "Omicron Draconis",
+      "ip": "107.150.47.52",
+      "port": 27016
+    },
+    {
+      "name": "Gamma Draconis",
+      "ip": "107.150.47.52",
+      "port": 27017
+    },
+    {
+      "name": "Sigma Draconis",
+      "ip": "107.150.38.60",
+      "port": 27016
+    },
+    {
+      "name": "Tau Draconis",
+      "ip": "107.150.38.60",
+      "port": 27017
+    }
+  ],
+  "ark": [
+    {
+      "name": "The island",
+      "ip": "199.15.253.66",
+      "port": 8030
+    },
+     {
+      "name": "Aberration",
+      "ip": "199.15.253.66",
+      "port": 7500
+    },
+    {
+      "name": "Scorched-Earth",
+      "ip": "199.15.253.66",
+      "port": 7530
+    },
+     {
+      "name": "Extinction",
+      "ip": "199.15.253.66",
+      "port": 7640
+    },
+     {
+      "name": "The Volcano",
+      "ip": "199.15.253.66",
+      "port": 8150
+    },
+    {
+      "name": "Ragnarok",
+      "ip": "199.15.253.66",
+      "port": 8180
+    }
+  ],
+  "7d2d": [
+     {
+      "name": "Sigma 7d2d",
+      "ip": "199.15.253.138",
+      "port": 7490
+    }
+  ]
+}
