@@ -1,6 +1,7 @@
 import json
 from threading import Thread, Event
 
+import mysql.connector
 import requests
 from flask import Flask, jsonify, make_response, abort
 from flask_cors import CORS
@@ -8,13 +9,26 @@ from flask_mysqldb import MySQL
 from flask_socketio import SocketIO
 from steam import game_servers as gs
 
+servers = {"SEDS1": "Sigma", "SEDS2": "Tau", "SEDS3": "Omicron", "SEDS4": "Gamma", "SEDS5": "Delta", "SEDS6": "Epsilon"}
+
 app = Flask(__name__)
+app.config.from_object("config.DevelopmentConfig")
 ws = SocketIO(app, async_mode="eventlet", logger=True, engineio_logger=True, cors_allowed_origins="*")
-app.config['MYSQL_HOST'] = ''
-app.config['MYSQL_USER'] = ''
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'sj'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+db = mysql.connector.connect(
+    host=app.config['MYSQL_HOST'],
+    user=app.config['MYSQL_USER'],
+    passwd=app.config['MYSQL_PASSWORD']
+)
+
+
+def fix_name(Score_Dict):
+    for x in servers.keys():
+        if Score_Dict["Server"] == x:
+            Score_Dict["Server"] = servers[x]
+    Score_Dict['PlanetId'] = Score_Dict["PlanetId"].split("-")[0]
+    print(Score_Dict)
+    return Score_Dict
+
 
 CORS(app)
 mysql = MySQL(app)
@@ -27,11 +41,12 @@ def update_thread():
     print("Update loop started")
     ws.sleep(5)
     while not thread_stop_event.isSet():
-        cur = mysql.connection.cursor()
+        cur = db.cursor(dictionary=True)
         cur.execute("SELECT * FROM sj.kothscores")
         data = cur.fetchall()
-        ws.emit('scores_update', {"scores": data}, namespace='/wss')
+        data = map(fix_name, data)
         cur.close()
+        ws.emit('scores_update', {"scores": list(data)}, namespace='/wss')
         for cat in get_servers():
             ws.emit('votes_update', {'server': cat, "votes": get_vote_data(cat)["votes"]}, namespace='/wss')
             for server in get_steam_data(cat)[cat]:
@@ -87,16 +102,12 @@ def get_vote_data(game):
     valid_games = get_servers()
     if game not in valid_games:
         return {"votes": 0, "voters": []}
-    ark = ""
-    se = ""
-    sdtd = ""
-    link = ""
+    ark = app.config["ARK_VOTE_LINK"]
+    se = app.config["SE_VOTE_LINK"]
     if game.lower() == "ark":
         link = ark
     elif game.lower() == "se":
         link = se
-    elif game.lower() == "ld2d":
-        link = sdtd
     else:
         return {"votes": 0, "voters": []}
     if link == "":
@@ -159,12 +170,28 @@ def vote_info(game):
 
 
 @app.route("/scores")
-def scores():
+@app.route("/scores/<server>")
+@app.route("/scores/<server>/<planet>")
+def scores(server=None, planet=None):
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM sj.kothscores")
     data = cur.fetchall()
+    data = map(fix_name, data)
     cur.close()
-    return jsonify({"scores": data})
+    if server:
+        s_data = list([x for x in list(data) if x['Server'].lower() == server.lower()])
+        if len(s_data) > 0:
+            if planet:
+                s = [x for x in s_data if x['PlanetId'].lower() == planet.lower()]
+                print("?")
+                print(s)
+                if len(s) < 1:
+                    return jsonify({"msg": "not found"}), 404
+                return jsonify({"scores": s})
+            return jsonify({"scores": list(s_data)})
+        else:
+            return jsonify({"msg": "not found"}, 404)
+    return jsonify({"scores": list(data)})
 
 
 if __name__ == '__main__':
