@@ -4,9 +4,9 @@ from threading import Thread, Event
 import requests
 from flask import Flask, jsonify, make_response, abort
 from flask_cors import CORS
+from flask_mysqldb import MySQL
 from flask_socketio import SocketIO
 from steam import game_servers as gs
-from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 ws = SocketIO(app, async_mode="eventlet", logger=True, engineio_logger=True, cors_allowed_origins="*")
@@ -159,7 +159,7 @@ def vote_info(game):
 
 
 @app.route("/scores")
-def test():
+def scores():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM sj.kothscores")
     data = cur.fetchall()
@@ -167,7 +167,5 @@ def test():
     return jsonify({"scores": data})
 
 
-
 if __name__ == '__main__':
     ws.run(app, port=8000)
-
