@@ -6,12 +6,18 @@ from flask import Flask, jsonify, make_response, abort
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from steam import game_servers as gs
-
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 ws = SocketIO(app, async_mode="eventlet", logger=True, engineio_logger=True, cors_allowed_origins="*")
+app.config['MYSQL_HOST'] = ''
+app.config['MYSQL_USER'] = ''
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'sj'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 CORS(app)
+mysql = MySQL(app)
 
 thread = Thread()
 thread_stop_event = Event()
@@ -21,6 +27,11 @@ def update_thread():
     print("Update loop started")
     ws.sleep(5)
     while not thread_stop_event.isSet():
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM sj.kothscores")
+        data = cur.fetchall()
+        ws.emit('scores_update', {"scores": data}, namespace='/wss')
+        cur.close()
         for cat in get_servers():
             ws.emit('votes_update', {'server': cat, "votes": get_vote_data(cat)["votes"]}, namespace='/wss')
             for server in get_steam_data(cat)[cat]:
@@ -147,5 +158,16 @@ def vote_info(game):
     return jsonify(get_vote_data(game))
 
 
+@app.route("/scores")
+def test():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM sj.kothscores")
+    data = cur.fetchall()
+    cur.close()
+    return jsonify({"scores": data})
+
+
+
 if __name__ == '__main__':
     ws.run(app, port=8000)
+

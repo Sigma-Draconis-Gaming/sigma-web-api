@@ -1,13 +1,23 @@
 {
   "se": [
     {
+      "name": "Lambda Draconis",
+      "ip": "104.238.221.110",
+      "port": 27017
+    },
+    {
+      "name": "Theta Draconis",
+      "ip": "104.238.221.110",
+      "port": 27018
+    },
+    {
       "name": "Epsilon Draconis",
-      "ip": "63.141.225.67",
+      "ip": "63.141.225.68",
       "port": 27017
     },
     {
       "name": "Delta Draconis",
-      "ip": "63.141.225.67",
+      "ip": "63.141.225.68",
       "port": 27016
     },
     {
@@ -53,7 +63,7 @@
       "port": 7640
     },
      {
-      "name": "The Volcano",
+      "name": "The Arena",
       "ip": "199.15.253.66",
       "port": 8150
     },
@@ -61,6 +71,11 @@
       "name": "Ragnarok",
       "ip": "199.15.253.66",
       "port": 8180
+    },
+    {
+      "name": "Genesis",
+      "ip": "199.15.253.66",
+      "port": 7410
     }
   ],
   "7d2d": [
