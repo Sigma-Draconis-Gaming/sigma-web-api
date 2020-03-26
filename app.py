@@ -12,7 +12,7 @@ from steam import game_servers as gs
 servers = {"SEDS1": "Sigma", "SEDS2": "Tau", "SEDS3": "Omicron", "SEDS4": "Gamma", "SEDS5": "Delta", "SEDS6": "Epsilon"}
 
 app = Flask(__name__)
-app.config.from_object("config.DevelopmentConfig")
+app.config.from_object("config.ProductionConfig")
 ws = SocketIO(app, async_mode="eventlet", logger=True, engineio_logger=True, cors_allowed_origins="*")
 db = mysql.connector.connect(
     host=app.config['MYSQL_HOST'],
@@ -151,6 +151,16 @@ def server_info(game):
     return jsonify({"servers": get_steam_data(game)[game]})
 
 
+@app.route("/online/<game>")
+def online_info(game):
+    valid_games = get_servers()
+    if game not in valid_games:
+        abort(404)
+    s = get_steam_data(game)[game]
+    t = sum([int(x['players']) for x in s])
+    return jsonify({"players": t})
+
+
 @app.route("/players/<ip>")
 def players(ip):
     ip = ip.split(':')
@@ -195,4 +205,4 @@ def scores(server=None, planet=None):
 
 
 if __name__ == '__main__':
-    ws.run(app, port=8000)
+    ws.run(app, host="0.0.0.0", port=8000)
