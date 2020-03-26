@@ -50,8 +50,11 @@ def update_thread():
         for cat in get_servers():
             ws.emit('votes_update', {'server': cat, "votes": get_vote_data(cat)["votes"]}, namespace='/wss')
             for server in get_steam_data(cat)[cat]:
+                t = sum([int(x['players']) for x in server])
+                ws.emit("online_update", {f'{cat}_count': t}, namespace='/wss')
                 ws.emit('server_update', {'server': server}, namespace='/wss')
                 ws.sleep(.1)
+
         ws.sleep(1)
 
 
