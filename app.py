@@ -19,6 +19,7 @@ db = mysql.connector.connect(
     user=app.config['MYSQL_USER'],
     passwd=app.config['MYSQL_PASSWORD']
 )
+db.reconnect(attempts=50, delay=5)
 
 
 def fix_name(Score_Dict):
@@ -41,11 +42,15 @@ def update_thread():
     print("Update loop started")
     ws.sleep(5)
     while not thread_stop_event.isSet():
-        cur = db.cursor(dictionary=True)
-        cur.execute("SELECT * FROM sj.kothscores")
-        data = cur.fetchall()
-        data = map(fix_name, data)
-        cur.close()
+        try:
+            cur = db.cursor(dictionary=True)
+            cur.execute("SELECT * FROM sj.kothscores")
+            data = cur.fetchall()
+            data = map(fix_name, data)
+            cur.close()
+        except Exception as e:
+            print(e)
+            continue
         ws.emit('scores_update', {"scores": list(data)}, namespace='/wss')
         for cat in get_servers():
             ws.emit('votes_update', {'server': cat, "votes": get_vote_data(cat)["votes"]}, namespace='/wss')
